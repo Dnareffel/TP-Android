@@ -26,7 +26,6 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-
         button.setOnClickListener {
 
             val message = editText2.text.toString()
@@ -50,10 +49,25 @@ class MainActivity : AppCompatActivity() {
 
                     if (response == 0) {
 
+                        textView.setText(null);
+
                         list.add(data?.getStringExtra("message") + "\n" )
-                        textView.append(data?.getStringExtra("message") + "\n")
+
+                        if(list.size > 10)
+                        {
+                            list.removeAt(0)
+                        }
+
+                        for (elem in list) {
+
+                            textView.append(elem)
+
+                        }
+
+                        //textView.append(data?.getStringExtra("message") + "\n")
                         editText2.setText("")
-                        Toast.makeText(this, "Le message a bien été envoyé}", Toast.LENGTH_SHORT).show()
+
+                        Toast.makeText(this, "Le message a bien été envoyé", Toast.LENGTH_SHORT).show()
 
                     } else if (response == 1) {
 
