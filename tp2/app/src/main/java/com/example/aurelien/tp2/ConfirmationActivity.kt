@@ -17,19 +17,22 @@ class ConfirmationActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_confirmation)
 
-        val message = intent.getStringExtra(EXTRA_MESSAGE)
+        val message = intent.getStringExtra(EXTRA_MESSAGE)//récupére le message reçu de la main activity
         //Toast.makeText(this, "Le message est ${message}", Toast.LENGTH_SHORT).show()
-        textView2.text =  message
+        textViewMessage.text =  message //rempli le textView avec le message reçu
 
-        buttonConfirm.setOnClickListener {
+
+        //Click sur bouton 'Confirmer'
+        btn_Confirm.setOnClickListener {
             val intent = Intent()
-            intent.putExtra("btn_pressed",0)
-            intent.putExtra("message",message)
-            setResult(RESULT_OK,intent)
+            intent.putExtra("btn_pressed",0)//passe la l'id du bouton dans l'intent
+            intent.putExtra("message",message)//passe le message
+            setResult(RESULT_OK,intent)//Requéte OK
             finish()
         }
 
-        buttonModify.setOnClickListener {
+        //Click sur bouton 'Modifier'
+        btn_Modify.setOnClickListener {
             val intent = Intent()
             intent.putExtra("btn_pressed",1)
             intent.putExtra("message",message)
@@ -37,7 +40,8 @@ class ConfirmationActivity : AppCompatActivity() {
             finish()
         }
 
-        buttonCancel.setOnClickListener {
+        //Click sur bouton 'Annuler'
+        btn_Cancel.setOnClickListener {
             val intent = Intent()
             intent.putExtra("btn_pressed",2)
             setResult(RESULT_OK,intent)
