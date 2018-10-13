@@ -6,10 +6,10 @@ import android.os.Bundle
 import android.widget.Toast
 
 import kotlinx.android.synthetic.main.activity_main.*
+import org.jetbrains.anko.mediaSessionManager
 import org.jetbrains.anko.startActivity
 import org.jetbrains.anko.startActivityForResult
-
-
+import org.jetbrains.anko.textClassificationManager
 
 
 class MainActivity : AppCompatActivity() {
@@ -20,7 +20,7 @@ class MainActivity : AppCompatActivity() {
 
     }
 
-    var list: ArrayList<String> = ArrayList()//liste qui contiendra nos messages
+    var messages_list: ArrayList<String> = ArrayList()//liste qui contiendra nos messages
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -29,10 +29,8 @@ class MainActivity : AppCompatActivity() {
 
         //click sur le boutton envoyer
         btn_envoyer.setOnClickListener {
-
-            val message = editTextMessage.text.toString()//récupére le message tapé dans l'edittext
             //Toast.makeText(this, "Le message est ${editText2.text.toString()}", Toast.LENGTH_SHORT).show()
-            startActivityForResult<ConfirmationActivity>(200, ConfirmationActivity.EXTRA_MESSAGE to message)//lance la seconde activity en lui passant le message dans l'intent
+            startActivityForResult<ConfirmationActivity>(200, ConfirmationActivity.EXTRA_MESSAGE to editTextMessage.text.toString())//lance la seconde activity en lui passant le message dans l'intent
         }
     }
 
@@ -50,47 +48,34 @@ class MainActivity : AppCompatActivity() {
                     //Toast.makeText(this, "Le message est ${data?.getIntExtra("btn_pressed",0)}", Toast.LENGTH_SHORT).show()
 
 
+                    val r = data?.getIntExtra(ConfirmationActivity.EXTRA_ISCONFIRMED, ConfirmationActivity.VAL_CANCEL) ?: ConfirmationActivity.VAL_CANCEL
 
-                    val response = data?.getIntExtra("btn_pressed", 0)//Valeur qui récupére l'id du boutton appuyé dans la ConfirmationActivity
 
                     //boutton 0 correspont à 'confirmer'
-                    if (response == 0) {
+                    when(r) {
 
-                        textViewList.setText(null);//réinitialisation du textView affichant nos messages
+                        ConfirmationActivity.VAL_CONFIRM -> {
 
-                        list.add(data?.getStringExtra("message") + "\n" )//Ajout du nouveau message à la liste de message
+                            textViewList.setText(null);//réinitialisation du textView affichant nos messages
 
-                        //supression du premier élément de la liste à 10
-                        if(list.size > 10)
-                        {
-                            list.removeAt(0)
+                            messages_list.add(editTextMessage.text.toString() + "\n" )//Ajout du nouveau message à la liste de message
+
+                            if(messages_list.size > 10)
+                            {
+                                messages_list.removeAt(0)
+                            }
+
+                            updateMessageView()
+
+                            editTextMessage.text.clear()
                         }
-
-                        //remplissage du textView avec les élements de notre liste
-                        for (elem in list) {
-
-                            textViewList.append(elem)
-
+                        ConfirmationActivity.VAL_MODIFY -> {
+                        } // rien de spécial à faire
+                        ConfirmationActivity.VAL_CANCEL -> {
+                            // On efface le texte saisi
+                            editTextMessage.text.clear()
                         }
-
-                        //textView.append(data?.getStringExtra("message") + "\n")
-                        editTextMessage.setText("")
-
-                        Toast.makeText(this, "Le message a bien été envoyé", Toast.LENGTH_SHORT).show()
-
-                    //boutton 1 correspond à 'modifier'
-                    } else if (response == 1) {
-
-                        editTextMessage.setText(data?.getStringExtra("message"))
-                        Toast.makeText(this, "Vous pouvez modifier votre message", Toast.LENGTH_SHORT).show()
-
-                    //boutton 2 correspond à 'annuler'
-                    } else if (response == 2) {
-
-                        editTextMessage.setText("")
-                        Toast.makeText(this, "L'envoi du message a bien été annulé", Toast.LENGTH_SHORT).show()
                     }
-
                 //si la requéte s'est mal passée alors
                 } else if (resultCode == RESULT_CANCELED) {
 
@@ -101,22 +86,29 @@ class MainActivity : AppCompatActivity() {
     }
 
 
+    private fun updateMessageView() {
+
+
+        //remplissage du textView avec les élements de notre liste
+        for (elem in messages_list) {
+
+            textViewList.append(elem)
+
+        }
+    }
 
     //fonction de sauvegarde de notre list
     override fun onSaveInstanceState(outState: Bundle) {
-        outState.putStringArrayList(STATE_TAB_MESSAGE, list)
+        outState.putStringArrayList(STATE_TAB_MESSAGE, messages_list)
         super.onSaveInstanceState(outState)
     }
 
     //fonction de récupération de la sauvegarde lors de la destruction
     override fun onRestoreInstanceState(savedInstanceState: Bundle) {
         super.onRestoreInstanceState(savedInstanceState)
-        list = savedInstanceState.getStringArrayList(STATE_TAB_MESSAGE)
+        messages_list = savedInstanceState.getStringArrayList(STATE_TAB_MESSAGE)
 
         //re-remplissage de la textview supprimée
-        for (elem in list) {
-            textViewList.append(elem)
-
-        }
+        updateMessageView()
     }
 }
